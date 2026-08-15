@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Запрещаем встраивать сайт где угодно, кроме spworlds.ru (см. объяснение ниже) -->
+<meta http-equiv="Content-Security-Policy" content="frame-ancestors https://spworlds.ru http://localhost:*;">
+<title>ПОДРЯД — стройбиржа СПм</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a1826; --bg-alt:#0e2136; --panel:#102639;
+    --line:#5fc9f2; --line-dim:rgba(95,201,242,0.22); --line-faint:rgba(95,201,242,0.09);
+    --accent:#ffa53d; --stamp:#ff5c5c;
+    --text:#eaf3ff; --text-dim:#7e97b3; --text-dimmer:#4d647d;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:960px;margin:0 auto;padding:28px 20px 80px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--line);opacity:.85;}
+  h1{font-family:'Space Grotesk';font-weight:700;font-size:clamp(24px,4vw,32px);margin:10px 0 6px;letter-spacing:-.01em;}
+  .userbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--line-dim);}
+  .user{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-dim);}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+  .dot.off{background:var(--text-dimmer);}
+  .btn{font-family:'Inter';font-weight:600;font-size:13.5px;padding:9px 16px;border-radius:4px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;background:none;color:var(--text);}
+  .btn-primary{background:var(--accent);color:#0a1509;}
+  .btn-primary:hover{background:#ffb85f;}
+  .btn-ghost{border-color:var(--line-dim);}
+  .btn-ghost:hover{border-color:var(--line);background:var(--line-faint);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;margin-top:8px;}
+  .ticket{background:var(--panel);border:1px solid var(--line-dim);border-radius:2px;padding:20px;}
+  .ticket-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .ticket-id{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dimmer);}
+  .stamp{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.05em;border:1.5px solid;border-radius:20px;padding:3px 9px;transform:rotate(-4deg);text-transform:uppercase;}
+  .stamp.open{color:var(--line);border-color:var(--line);}
+  .stamp.awaiting_payment{color:#c9a8ff;border-color:#c9a8ff;}
+  .stamp.in_progress{color:var(--accent);border-color:var(--accent);}
+  .stamp.review{color:var(--stamp);border-color:var(--stamp);}
+  .stamp.done{color:#6dd58c;border-color:#6dd58c;}
+  .ticket h3{font-family:'Space Grotesk';font-size:17px;font-weight:600;margin-bottom:8px;}
+  .ticket p.desc{font-size:13px;color:var(--text-dim);margin-bottom:12px;line-height:1.5;}
+  .ticket-meta{font-size:12.5px;color:var(--text-dim);margin-bottom:14px;font-family:'JetBrains Mono',monospace;}
+  .ticket-foot{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px dashed var(--line-dim);}
+  .price{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--accent);}
+  .price span{font-size:10px;color:var(--text-dimmer);font-weight:400;}
+  .actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;}
+  .empty{color:var(--text-dimmer);font-family:'JetBrains Mono',monospace;font-size:13px;padding:40px 0;text-align:center;}
+
+  .new-order{background:var(--bg-alt);border:1px solid var(--line-dim);border-radius:6px;padding:22px;margin-bottom:32px;display:none;}
+  .new-order.show{display:block;}
+  .new-order h3{font-family:'Space Grotesk';font-size:16px;margin-bottom:14px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:5px;font-family:'JetBrains Mono',monospace;}
+  .field input,.field textarea{width:100%;background:var(--panel);border:1px solid var(--line-dim);border-radius:4px;padding:9px 11px;color:var(--text);font-family:'Inter';font-size:13.5px;}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--line);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--line);color:var(--text);padding:12px 20px;border-radius:6px;font-size:13.5px;font-family:'JetBrains Mono',monospace;opacity:0;transition:all .3s;pointer-events:none;z-index:100;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <span class="eyebrow">Стройбиржа СПм</span>
+  <h1>ПОДРЯД</h1>
+
+  <div class="userbar">
+    <div class="user"><span class="dot off" id="userDot"></span><span id="userLabel">определяем игрока…</span></div>
+    <button class="btn btn-primary" id="newOrderBtn">+ Разместить заказ</button>
+  </div>
+
+  <div class="new-order" id="newOrderForm">
+    <h3>Новый заказ</h3>
+    <div class="field"><label>Что построить</label><input id="f-title" placeholder="Например: Ферма железа"></div>
+    <div class="field"><label>Описание</label><textarea id="f-desc" rows="2" placeholder="Детали, стиль, референсы..."></textarea></div>
+    <div class="row2">
+      <div class="field"><label>Бюджет, АР</label><input id="f-budget" type="number" placeholder="300"></div>
+      <div class="field"><label>Срок, дней</label><input id="f-days" type="number" placeholder="3"></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="submitOrder">Опубликовать</button>
+      <button class="btn btn-ghost" id="cancelOrder">Отмена</button>
+    </div>
+  </div>
+
+  <div class="board" id="board">
+    <div class="empty">Загружаем доску заказов…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  // spwmini подключается прямо в браузере через esm.sh — сборщик не нужен
+  import SPWMini from 'https://esm.sh/spwmini@1/client';
+
+  // === Настройка ===
+  // ID мини-приложения выдаётся на странице /[сервер]/apps/ при регистрации приложения.
+  // Пока сайт открыт не изнутри spworlds.ru (например при локальной разработке),
+  // spwmini не сможет получить пользователя — тогда включаем гостевой режим для теста.
+  const APP_ID = window.PODRYAD_APP_ID || 'YOUR-APP-ID-HERE';
+  const spm = new SPWMini(APP_ID);
+
+  const STATUS_LABELS = {
+    open: 'открыт', awaiting_payment: 'ждёт оплаты', in_progress: 'в работе',
+    review: 'приёмка', done: 'завершён',
+  };
+
+  let currentUser = null; // { username, minecraftUUID } из spwmini, либо гостевой ник
+
+  const toast = (msg) => {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2600);
+  };
+
+  // === Авторизация через spwmini ===
+  spm.on('ready', () => {
+    currentUser = { username: spm.user.username, verified: true };
+    document.getElementById('userDot').classList.remove('off');
+    document.getElementById('userLabel').textContent = spm.user.username;
+  });
+  spm.on('initError', () => {
+    // Не внутри spworlds.ru — включаем гостевой режим, чтобы страницу можно
+    // было открыть и потестировать напрямую в браузере
+    currentUser = { username: 'Гость', verified: false };
+    document.getElementById('userLabel').textContent = 'Гость (не через spworlds.ru)';
+  });
+
+  // === Загрузка и рендер заказов ===
+  async function loadOrders() {
+    const res = await fetch('/api/orders');
+    const orders = await res.json();
+    renderBoard(orders);
+  }
+
+  function renderBoard(orders) {
+    const board = document.getElementById('board');
+    if (!orders.length) {
+      board.innerHTML = '<div class="empty">Пока заказов нет — стань первым</div>';
+      return;
+    }
+    board.innerHTML = orders.map(orderCard).join('');
+
+    orders.forEach((o) => {
+      const assignBtn = document.getElementById(`assign-${o.id}`);
+      if (assignBtn) assignBtn.onclick = () => assignOrder(o.id);
+      const payBtn = document.getElementById(`pay-${o.id}`);
+      if (payBtn) payBtn.onclick = () => payOrder(o.id);
+      const reviewBtn = document.getElementById(`review-${o.id}`);
+      if (reviewBtn) reviewBtn.onclick = () => reviewOrder(o.id);
+      const completeBtn = document.getElementById(`complete-${o.id}`);
+      if (completeBtn) completeBtn.onclick = () => completeOrder(o.id);
+    });
+  }
+
+  function orderCard(o) {
+    let actions = '';
+    if (o.status === 'open') {
+      actions = `<button class="btn btn-primary" id="assign-${o.id}">Откликнуться</button>`;
+    } else if (o.status === 'awaiting_payment') {
+      actions = `<button class="btn btn-primary" id="pay-${o.id}">Оплатить в эскроу</button>`;
+    } else if (o.status === 'in_progress') {
+      actions = `<button class="btn btn-ghost" id="review-${o.id}">Сдать на приёмку</button>`;
+    } else if (o.status === 'review') {
+      actions = `<button class="btn btn-primary" id="complete-${o.id}">Принять и оплатить</button>`;
+    }
+
+    return `
+      <div class="ticket">
+        <div class="ticket-top">
+          <span class="ticket-id">ЗАКАЗ № ${String(o.id).padStart(3, '0')}</span>
+          <span class="stamp ${o.status}">${STATUS_LABELS[o.status]}</span>
+        </div>
+        <h3>${escapeHtml(o.title)}</h3>
+        ${o.description ? `<p class="desc">${escapeHtml(o.description)}</p>` : ''}
+        <div class="ticket-meta">Срок: ${o.deadlineDays} дн. ${o.builder ? `· Мастер: ${escapeHtml(o.builder)}` : ''}</div>
+        <div class="ticket-foot">
+          <div class="price">${o.budget}<span> АР</span></div>
+        </div>
+        <div class="actions">${actions}</div>
+      </div>`;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // === Действия ===
+  async function assignOrder(id) {
+    const builder = currentUser?.username || 'Гость';
+    const builderCard = prompt('Введи номер своей карты SPWorlds для получения оплаты:');
+    if (!builderCard) return;
+
+    const res = await fetch(`/api/orders/${id}/assign`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ builder, builderCard }),
+    });
+    if (res.ok) { toast('Ты назначен мастером. Ждём оплату заказчика.'); loadOrders(); }
+    else toast('Не получилось откликнуться');
+  }
+
+  async function payOrder(id) {
+    const res = await fetch(`/api/orders/${id}/pay`, { method: 'POST' });
+    if (!res.ok) return toast('Не удалось создать платёж');
+    const { code } = await res.json();
+
+    if (currentUser?.verified) {
+      // Внутри spworlds.ru — открываем нативное окно оплаты мини-приложения
+      spm.openPayment(code);
+      spm.on('paymentResponse', () => { toast('Оплата прошла — заказ передан в работу'); loadOrders(); });
+      spm.on('paymentError', (e) => toast('Оплата не удалась: ' + e));
+    } else {
+      // Гостевой режим / открыто не через spworlds.ru — просто уведомляем,
+      // куда обычно ведёт код оплаты (в реальном мини-приложении это делает spm.openPayment)
+      toast('Код платежа создан: ' + code + ' (открой через spworlds.ru для оплаты)');
+    }
+  }
+
+  async function reviewOrder(id) {
+    const res = await fetch(`/api/orders/${id}/review`, { method: 'POST' });
+    if (res.ok) { toast('Заказ отправлен на приёмку'); loadOrders(); }
+    else toast('Не получилось');
+  }
+
+  async function completeOrder(id) {
+    if (!confirm('Подтвердить приёмку и перевести АРы мастеру?')) return;
+    const res = await fetch(`/api/orders/${id}/complete`, { method: 'POST' });
+    if (res.ok) { toast('Готово! АРы переведены мастеру.'); loadOrders(); }
+    else toast('Не удалось завершить сделку');
+  }
+
+  // === Форма нового заказа ===
+  const form = document.getElementById('newOrderForm');
+  document.getElementById('newOrderBtn').onclick = () => form.classList.toggle('show');
+  document.getElementById('cancelOrder').onclick = () => form.classList.remove('show');
+  document.getElementById('submitOrder').onclick = async () => {
+    const title = document.getElementById('f-title').value.trim();
+    const description = document.getElementById('f-desc').value.trim();
+    const budget = document.getElementById('f-budget').value;
+    const deadlineDays = document.getElementById('f-days').value;
+
+    if (!title || !budget) return toast('Укажи название и бюджет');
+
+    const res = await fetch('/api/orders', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description, budget, deadlineDays, customer: currentUser?.username || 'Гость' }),
+    });
+    if (res.ok) {
+      toast('Заказ опубликован');
+      form.classList.remove('show');
+      ['f-title','f-desc','f-budget','f-days'].forEach(id => document.getElementById(id).value = '');
+      loadOrders();
+    } else toast('Не удалось создать заказ');
+  };
+
+  loadOrders();
+</script>
+
+</body>
+</html>

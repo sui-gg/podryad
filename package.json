@@ -1,0 +1,18 @@
+{
+  "name": "podryad",
+  "version": "1.0.0",
+  "description": "Стройбиржа с эскроу на АР для сервера СПм (SPWorlds)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "spwmini": "^1.2.0",
+    "spworlds": "^2.2.2"
+  }
+}
