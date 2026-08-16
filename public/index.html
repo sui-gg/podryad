@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://spworlds.ru http://localhost:*;">
 <title>Archinvest — стройбиржа СПм</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#140b26; --bg-alt:#1b1038; --panel:#221446;
@@ -15,7 +15,7 @@
     --accent:#e879f9; --stamp:#ff6b9d;
     --text:#f4eeff; --text-dim:#a794cf; --text-dimmer:#6d5a94;
     --f-pixel:'Press Start 2P',monospace;
-    --f-body:'Pixelify Sans',sans-serif;
+    --f-body:'Inter',sans-serif;
     --f-mono:'VT323',monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -105,7 +105,7 @@
   .cab-row-meta{font-family:var(--f-mono);font-size:15px;color:var(--text-dim);}
 
   /* О нас */
-  .about{display:block;}
+  .about{display:none;}
   .about.show{display:block;}
   .about p{font-size:14.5px;line-height:1.7;color:var(--text-dim);margin-bottom:14px;max-width:640px;}
   .about-owner{margin-top:32px;background:var(--panel);border:1px solid var(--line-dim);border-radius:8px;padding:22px;display:flex;gap:18px;align-items:flex-start;max-width:640px;}
@@ -327,7 +327,8 @@
 
   function renderBoard(orders) {
     if (!orders.length) {
-      boardEl.innerHTML = '<div class="empty">Пока заказов нет — стань первым</div>';
+      boardEl.innerHTML = '<div class="empty">Заказов пока что нет<br><button class="btn btn-primary" id="emptyCreateBtn" style="margin-top:14px;">+ Разместить заказ</button></div>';
+      bind('emptyCreateBtn', () => newOrderForm.classList.add('show'));
       return;
     }
     boardEl.innerHTML = orders.map(orderCard).join('');
@@ -483,6 +484,7 @@
   };
 
   renderCabinetHeader();
+  showTab('about');
   loadOrders();
 </script>
 
