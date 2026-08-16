@@ -69,6 +69,8 @@
   .stamp.in_progress{color:var(--accent);border-color:var(--accent);}
   .stamp.review{color:var(--stamp);border-color:var(--stamp);}
   .stamp.done{color:#6dd58c;border-color:#6dd58c;}
+  .stamp.paid{color:#6dd58c;border-color:#6dd58c;transform:rotate(3deg);}
+  .stamp-row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;}
   .ticket h3{font-family:var(--f-pixel);font-size:13px;font-weight:400;margin-bottom:10px;line-height:1.5;}
   .ticket p.desc{font-size:14px;color:var(--text-dim);margin-bottom:12px;line-height:1.5;}
   .ticket-meta{font-size:16px;color:var(--text-dim);margin-bottom:6px;font-family:var(--f-mono);}
@@ -362,7 +364,10 @@
       <div class="ticket">
         <div class="ticket-top">
           <span class="ticket-id">№ ${String(o.id).padStart(3, '0')}</span>
-          <span class="stamp ${o.status}">${STATUS_LABELS[o.status]}</span>
+          <span class="stamp-row">
+            <span class="stamp ${o.status}">${STATUS_LABELS[o.status]}</span>
+            ${['in_progress','review','done'].includes(o.status) ? '<span class="stamp paid">ОПЛАЧЕН</span>' : ''}
+          </span>
         </div>
         <h3>${escapeHtml(o.title)}</h3>
         ${o.description ? `<p class="desc">${escapeHtml(o.description)}</p>` : ''}
