@@ -44,6 +44,39 @@ if (SPWMINI_APP_TOKEN) {
   app.post('/validate', spwminiValidate(SPWMINI_APP_TOKEN));
 }
 
+// ВАЖНО: /api/webhook тоже должен стоять ДО express.json() по той же причине,
+// что и /validate — SPWorlds подписывает СЫРОЕ тело запроса, а если
+// express.json() успеет его распарсить первым, req.body станет объектом
+// вместо строки, и проверка подписи будет всегда проваливаться (именно
+// это и вызывало "статус висит на ожидании оплаты, хотя деньги списались").
+app.post(
+  '/api/webhook',
+  express.raw({ type: '*/*' }), // нужно сырое тело, чтобы проверить подпись
+  (req, res) => {
+    const rawBody = req.body.toString('utf-8');
+    const hashHeader = req.headers['x-body-hash'];
+
+    if (!spw.validateHash(rawBody, hashHeader)) {
+      console.warn('[webhook] невалидная подпись — запрос проигнорирован');
+      return res.status(400).end();
+    }
+
+    const payload = JSON.parse(rawBody);
+    const orderId = Number(payload.data); // мы передавали id заказа в data
+
+    const orders = loadOrders();
+    const order = orders.find((o) => o.id === orderId);
+
+    if (order && order.status === 'awaiting_payment') {
+      order.status = 'in_progress';
+      saveOrders(orders);
+      console.log(`[webhook] заказ №${orderId} оплачен, деньги в эскроу`);
+    }
+
+    res.status(200).end();
+  }
+);
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -113,10 +146,11 @@ app.post('/api/orders', (req, res) => {
 
 // --------------------------------------------------------------------------
 // DELETE /api/orders/:id — удалить заказ.
-// Разрешено только пока заказ ОТКРЫТ (ещё не взят мастером) и только
-// автору заказа. Проверка по нику — не железная защита (полноценная
-// авторизация появится, когда сайт станет мини-приложением), но отсекает
-// случайные/чужие удаления.
+// Разрешено пока заказ ОТКРЫТ или ждёт оплаты (ещё не подтверждена оплата)
+// и только автору заказа — это же страховка на случай, если вебхук оплаты
+// не пришёл и статус завис на "ждёт оплаты". Проверка по нику — не железная
+// защита (полноценная авторизация появится, когда сайт станет
+// мини-приложением), но отсекает случайные/чужие удаления.
 // body: { customer }
 // --------------------------------------------------------------------------
 app.delete('/api/orders/:id', (req, res) => {
@@ -125,8 +159,8 @@ app.delete('/api/orders/:id', (req, res) => {
   const order = orders.find((o) => o.id === Number(req.params.id));
 
   if (!order) return res.status(404).json({ error: 'Заказ не найден' });
-  if (order.status !== 'open') {
-    return res.status(400).json({ error: 'Можно удалить только открытый заказ' });
+  if (!['open', 'awaiting_payment'].includes(order.status)) {
+    return res.status(400).json({ error: 'Заказ уже в работе — отменить нельзя' });
   }
   if (order.customer !== customer) {
     return res.status(403).json({ error: 'Удалить заказ может только его автор' });
@@ -194,37 +228,6 @@ app.post('/api/orders/:id/pay', async (req, res) => {
     res.status(502).json({ error: 'Не удалось создать платёж' });
   }
 });
-
-// --------------------------------------------------------------------------
-// POST /api/webhook — сюда SPWorlds шлёт уведомление об успешной оплате
-// --------------------------------------------------------------------------
-app.post(
-  '/api/webhook',
-  express.raw({ type: '*/*' }), // нужно сырое тело, чтобы проверить подпись
-  (req, res) => {
-    const rawBody = req.body.toString('utf-8');
-    const hashHeader = req.headers['x-body-hash'];
-
-    if (!spw.validateHash(rawBody, hashHeader)) {
-      console.warn('[webhook] невалидная подпись — запрос проигнорирован');
-      return res.status(400).end();
-    }
-
-    const payload = JSON.parse(rawBody);
-    const orderId = Number(payload.data); // мы передавали id заказа в data
-
-    const orders = loadOrders();
-    const order = orders.find((o) => o.id === orderId);
-
-    if (order && order.status === 'awaiting_payment') {
-      order.status = 'in_progress';
-      saveOrders(orders);
-      console.log(`[webhook] заказ №${orderId} оплачен, деньги в эскроу`);
-    }
-
-    res.status(200).end();
-  }
-);
 
 // --------------------------------------------------------------------------
 // POST /api/orders/:id/review — мастер сдаёт работу
