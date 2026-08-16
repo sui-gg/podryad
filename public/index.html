@@ -80,6 +80,7 @@
   .price span{font-size:12px;color:var(--text-dimmer);}
   .actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;}
   .empty{color:var(--text-dimmer);font-family:var(--f-mono);font-size:16px;padding:40px 0;text-align:center;}
+  .board-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:240px;color:var(--text-dimmer);font-family:var(--f-mono);font-size:16px;text-align:center;}
 
   .new-order{background:var(--bg-alt);border:1px solid var(--line-dim);border-radius:6px;padding:22px;margin-bottom:32px;display:none;}
   .new-order.show{display:block;}
@@ -304,7 +305,7 @@
     if (which === 'board') {
       tabBoard.classList.add('active');
       boardEl.style.display = 'grid';
-      newOrderBtn.style.display = '';
+      newOrderBtn.style.display = allOrders.length ? '' : 'none';
     } else if (which === 'cabinet') {
       tabCabinet.classList.add('active');
       cabinetEl.classList.add('show');
@@ -329,11 +330,13 @@
 
   function renderBoard(orders) {
     if (!orders.length) {
-      boardEl.innerHTML = '<div class="empty">Заказов пока что нет<br><button class="btn btn-primary" id="emptyCreateBtn" style="margin-top:14px;">+ Разместить заказ</button></div>';
+      boardEl.innerHTML = '<div class="board-empty">Заказов пока что нет<button class="btn btn-primary" id="emptyCreateBtn">+ Разместить заказ</button></div>';
       bind('emptyCreateBtn', () => newOrderForm.classList.add('show'));
+      newOrderBtn.style.display = 'none';
       return;
     }
     boardEl.innerHTML = orders.map(orderCard).join('');
+    if (boardEl.style.display === 'grid') newOrderBtn.style.display = '';
 
     orders.forEach((o) => {
       bind(`assign-${o.id}`, () => assignOrder(o.id));
@@ -347,13 +350,13 @@
 
   function orderCard(o) {
     let actions = '';
+    const isOwner = currentUser && o.customer === currentUser.username;
     if (o.status === 'open') {
       actions = `<button class="btn btn-primary btn-sm" id="assign-${o.id}">Откликнуться</button>`;
-      if (currentUser && o.customer === currentUser.username) {
-        actions += `<button class="btn btn-danger btn-sm" id="delete-${o.id}">Удалить</button>`;
-      }
+      if (isOwner) actions += `<button class="btn btn-danger btn-sm" id="delete-${o.id}">Удалить</button>`;
     } else if (o.status === 'awaiting_payment') {
       actions = `<button class="btn btn-primary btn-sm" id="pay-${o.id}">Оплатить в эскроу</button>`;
+      if (isOwner) actions += `<button class="btn btn-danger btn-sm" id="delete-${o.id}">Отменить заказ</button>`;
     } else if (o.status === 'in_progress') {
       actions = `<button class="btn btn-ghost btn-sm" id="review-${o.id}">Сдать на приёмку</button>`;
     } else if (o.status === 'review') {
