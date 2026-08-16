@@ -204,21 +204,14 @@
     else toast('Не получилось откликнуться');
   }
 
-  async function payOrder(id) {
+ async function payOrder(id) {
     const res = await fetch(`/api/orders/${id}/pay`, { method: 'POST' });
     if (!res.ok) return toast('Не удалось создать платёж');
-    const { code } = await res.json();
+    const { url } = await res.json();
 
-    if (currentUser?.verified) {
-      // Внутри spworlds.ru — открываем нативное окно оплаты мини-приложения
-      spm.openPayment(code);
-      spm.on('paymentResponse', () => { toast('Оплата прошла — заказ передан в работу'); loadOrders(); });
-      spm.on('paymentError', (e) => toast('Оплата не удалась: ' + e));
-    } else {
-      // Гостевой режим / открыто не через spworlds.ru — просто уведомляем,
-      // куда обычно ведёт код оплаты (в реальном мини-приложении это делает spm.openPayment)
-      toast('Код платежа создан: ' + code + ' (открой через spworlds.ru для оплаты)');
-    }
+    // Открываем настоящую страницу оплаты SPWorlds — так же, как это делает FreshMarket
+    window.open(url, '_blank', 'width=460,height=640');
+    toast('Открыто окно оплаты — заверши платёж и вернись сюда');
   }
 
   async function reviewOrder(id) {
