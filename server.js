@@ -166,21 +166,19 @@ app.post('/api/orders/:id/pay', async (req, res) => {
   }
 
   try {
-    const payment = await spw.initPayment({
-      items: [
-        {
-          name: `Заказ №${order.id}: ${order.title}`,
-          count: 1,
-          price: order.budget,
-          comment: `Эскроу-платёж за заказ №${order.id}`,
-        },
-      ],
-      // '#MINIAPP' — обязательное значение, если открываем окно оплаты
-      // через spm.openPayment() внутри мини-приложения на spworlds.ru
-    redirectUrl: `${PUBLIC_URL}?paid=${order.id}`,
-      webhookUrl: `${PUBLIC_URL}/api/webhook`,
-      data: String(order.id),
-    });
+  const payment = await spw.initPayment({
+  items: [
+    {
+      name: `Заказ №${order.id}: ${order.title}`,
+      count: 1,
+      price: order.budget,
+      comment: `Эскроу-платёж за заказ №${order.id}`,
+    },
+  ],
+  redirectUrl: `${PUBLIC_URL}?paid=${order.id}`,
+  webhookUrl: `${PUBLIC_URL}/api/webhook`,
+  data: String(order.id),
+});
 
    order.paymentCode = payment.code;
     saveOrders(orders);
