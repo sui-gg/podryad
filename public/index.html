@@ -7,7 +7,6 @@
 <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://spworlds.ru http://localhost:*;">
 <title>Archinvest — стройбиржа СПм</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<!-- Пиксельные шрифты: Press Start 2P — заголовки, Pixelify Sans — текст, VT323 — цифры/лейблы -->
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -20,27 +19,46 @@
     --f-mono:'VT323',monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:var(--f-body);-webkit-font-smoothing:antialiased;image-rendering:pixelated;}
+  body{background:var(--bg);color:var(--text);font-family:var(--f-body);-webkit-font-smoothing:antialiased;}
   .wrap{max-width:980px;margin:0 auto;padding:28px 20px 80px;}
   .eyebrow{font-family:var(--f-mono);font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--line);opacity:.9;}
   h1{font-family:var(--f-pixel);font-weight:400;font-size:clamp(18px,3.4vw,26px);margin:14px 0 8px;line-height:1.4;letter-spacing:-.01em;}
+  h2{font-family:var(--f-pixel);font-weight:400;font-size:16px;line-height:1.6;margin-bottom:16px;}
   .tabs{display:flex;gap:6px;margin-bottom:24px;}
   .tab{font-family:var(--f-mono);font-size:16px;padding:8px 16px;border:1.5px solid var(--line-dim);border-radius:4px;cursor:pointer;color:var(--text-dim);background:none;letter-spacing:.03em;}
-  .tab.active{color:var(--accent);border-color:var(--accent);background:rgba(255,165,61,.08);}
-  .userbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line-dim);}
-  .user{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:16px;color:var(--text-dim);}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
-  .dot.off{background:var(--text-dimmer);}
+  .tab.active{color:var(--accent);border-color:var(--accent);background:rgba(232,121,249,.08);}
+  .userbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line-dim);}
   .btn{font-family:var(--f-body);font-weight:600;font-size:13px;padding:9px 16px;border-radius:4px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;background:none;color:var(--text);}
-  .btn-primary{background:var(--accent);color:#0a1509;}
-  .btn-primary:hover{background:#ffb85f;}
+  .btn-primary{background:var(--accent);color:#1c0a26;}
+  .btn-primary:hover{background:#f2a1ff;}
   .btn-ghost{border-color:var(--line-dim);}
   .btn-ghost:hover{border-color:var(--line);background:var(--line-faint);}
   .btn-danger{border-color:var(--stamp);color:var(--stamp);}
-  .btn-danger:hover{background:rgba(255,92,92,.1);}
+  .btn-danger:hover{background:rgba(255,107,157,.1);}
   .btn:disabled{opacity:.4;cursor:not-allowed;}
   .btn-sm{font-size:11.5px;padding:7px 12px;}
- 
+
+  /* === Мини-профиль в углу экрана (привязан к SPWorlds) === */
+  .profile-chip{
+    position:fixed; top:16px; right:16px; z-index:50;
+    display:flex; align-items:center; gap:10px;
+    background:var(--panel); border:1px solid var(--line-dim); border-radius:30px;
+    padding:6px 14px 6px 6px; cursor:pointer; user-select:none;
+    box-shadow:0 4px 18px rgba(0,0,0,.35);
+  }
+  .profile-chip:hover{border-color:var(--line);}
+  .profile-chip .avatar{
+    width:30px;height:30px;border-radius:50%;background:var(--bg-alt);
+    border:1px solid var(--line-dim); display:flex; align-items:center; justify-content:center;
+    font-family:var(--f-pixel); font-size:11px; color:var(--line); flex-shrink:0;
+  }
+  .profile-chip .info{display:flex;flex-direction:column;line-height:1.2;}
+  .profile-chip .pname{font-family:var(--f-body);font-weight:600;font-size:13px;}
+  .profile-chip .pstatus{font-family:var(--f-mono);font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
+  .profile-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--text-dimmer);}
+  .profile-chip .dot.on{background:#6dd58c;}
+  @media(max-width:560px){ .profile-chip{ top:auto; bottom:16px; right:16px; } }
+
   .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;margin-top:8px;}
   .ticket{background:var(--panel);border:1px solid var(--line-dim);border-radius:2px;padding:20px;}
   .ticket-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
@@ -60,7 +78,7 @@
   .price span{font-size:12px;color:var(--text-dimmer);}
   .actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;}
   .empty{color:var(--text-dimmer);font-family:var(--f-mono);font-size:16px;padding:40px 0;text-align:center;}
- 
+
   .new-order{background:var(--bg-alt);border:1px solid var(--line-dim);border-radius:6px;padding:22px;margin-bottom:32px;display:none;}
   .new-order.show{display:block;}
   .new-order h3{font-family:var(--f-pixel);font-size:13px;font-weight:400;margin-bottom:16px;}
@@ -71,7 +89,7 @@
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--line);color:var(--text);padding:12px 20px;border-radius:6px;font-size:14px;font-family:var(--f-mono);opacity:0;transition:all .3s;pointer-events:none;z-index:100;max-width:80vw;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
- 
+
   /* Кабинет */
   .cabinet{display:none;}
   .cabinet.show{display:block;}
@@ -85,24 +103,42 @@
   .cab-row{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line-dim);border-radius:4px;padding:12px 16px;gap:10px;flex-wrap:wrap;}
   .cab-row-title{font-size:14px;}
   .cab-row-meta{font-family:var(--f-mono);font-size:15px;color:var(--text-dim);}
+
+  /* О нас */
+  .about{display:block;}
+  .about.show{display:block;}
+  .about p{font-size:14.5px;line-height:1.7;color:var(--text-dim);margin-bottom:14px;max-width:640px;}
+  .about-owner{margin-top:32px;background:var(--panel);border:1px solid var(--line-dim);border-radius:8px;padding:22px;display:flex;gap:18px;align-items:flex-start;max-width:640px;}
+  .about-owner .cab-avatar{width:60px;height:60px;font-size:20px;flex-shrink:0;}
+  .about-owner h4{font-family:var(--f-pixel);font-size:13px;margin-bottom:8px;color:var(--accent);}
+  .about-owner p{margin-bottom:0;}
 </style>
 </head>
 <body>
- 
+
+<!-- Мини-профиль в углу — привязан к SPWorlds, кликабелен -> открывает Кабинет -->
+<div class="profile-chip" id="profileChip">
+  <div class="avatar" id="chipAvatar">?</div>
+  <div class="info">
+    <span class="pname" id="chipName">определяем игрока…</span>
+    <span class="pstatus"><span class="dot" id="chipDot"></span><span id="chipStatus">офлайн</span></span>
+  </div>
+</div>
+
 <div class="wrap">
   <span class="eyebrow">Стройбиржа СПм</span>
   <h1>Archinvest</h1>
- 
+
   <div class="tabs">
-    <button class="tab active" id="tabBoard">Доска заказов</button>
+    <button class="tab active" id="tabAbout">О нас</button>
+    <button class="tab" id="tabBoard">Доска заказов</button>
     <button class="tab" id="tabCabinet">Кабинет</button>
   </div>
- 
+
   <div class="userbar">
-    <div class="user"><span class="dot off" id="userDot"></span><span id="userLabel">определяем игрока…</span></div>
-    <button class="btn btn-primary" id="newOrderBtn">+ Разместить заказ</button>
+    <button class="btn btn-primary" id="newOrderBtn" style="display:none;">+ Разместить заказ</button>
   </div>
- 
+
   <div class="new-order" id="newOrderForm">
     <h3>Новый заказ</h3>
     <div class="field"><label>Что построить</label><input id="f-title" placeholder="Например: Ферма железа"></div>
@@ -117,11 +153,11 @@
       <button class="btn btn-ghost" id="cancelOrder">Отмена</button>
     </div>
   </div>
- 
-  <div class="board" id="board">
+
+  <div class="board" id="board" style="display:none;">
     <div class="empty">Загружаем доску заказов…</div>
   </div>
- 
+
   <div class="cabinet" id="cabinet">
     <div class="cab-head">
       <div class="cab-avatar" id="cabAvatar">?</div>
@@ -133,74 +169,154 @@
         </div>
       </div>
     </div>
- 
+
     <div class="cab-section">
       <h4>Мои заказы (как заказчик)</h4>
       <div class="cab-list" id="cabCustomerList"><div class="empty">Пока пусто</div></div>
     </div>
- 
+
     <div class="cab-section">
       <h4>Мои стройки (как мастер)</h4>
       <div class="cab-list" id="cabBuilderList"><div class="empty">Пока пусто</div></div>
     </div>
   </div>
+
+  <!-- === О НАС === -->
+  <!-- ⚠️ Плейсхолдер: замени текст ниже на реальный, я не знаю деталей о вашем проекте -->
+  <div class="about" id="about">
+    <h2>Кто мы такие</h2>
+    <p>
+      Archinvest — стройбиржа №1 сервера СПм. Пока другие площадки путаются в блокнотах
+      и личке в дискорде, мы держим весь рынок строительных заказов в одном месте:
+      разместил заявку — получил мастера, без беготни и потерянных договорённостей.
+    </p>
+    <p>
+      Мы не просто доска объявлений. Каждая сделка проходит через эскроу — деньги лежат
+      у биржи, пока заказчик не примет работу, так что ни заказчик не останется без
+      постройки, ни мастер без оплаты. Честно, прозрачно, без разборок в стиле
+      «а ты обещал».
+    </p>
+    <p>
+      Заказов всё больше, мастеров всё больше — и это только начало. Archinvest
+      строит не дома, а репутацию главной стройбиржи СПм.
+    </p>
+
+    <div class="about-owner">
+      <div class="cab-avatar">W</div>
+      <div>
+        <h4>Основатель — _whys_</h4>
+        <p>
+          Archinvest придумал и запустил _whys_ — с идеей навести порядок в хаосе
+          стройзаказов на сервере и сделать так, чтобы за постройки платили честно
+          и вовремя. Всё, что видишь на сайте, начиналось с одной простой мысли:
+          на СПм не хватало нормальной биржи, и её нужно было просто взять и сделать.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:24px;font-size:13px;color:var(--text-dimmer);">
+      Профиль в углу экрана подтягивается автоматически, если открыть сайт через
+      приложение SPWorlds — так система узнаёт, кто ты. При обычном открытии по ссылке
+      в браузере (не через spworlds.ru) сайт этого сделать не может — так устроена
+      платформа SPWorlds.
+    </p>
+  </div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script type="module">
   import SPWMini from 'https://esm.sh/spwmini@1/client';
- 
+
   const APP_ID = window.PODRYAD_APP_ID || 'YOUR-APP-ID-HERE';
   const spm = new SPWMini(APP_ID);
- 
+
   const STATUS_LABELS = {
     open: 'открыт', awaiting_payment: 'ждёт оплаты', in_progress: 'в работе',
     review: 'приёмка', done: 'завершён',
   };
- 
+
   let currentUser = null;
   let allOrders = [];
- 
+
   const toast = (msg) => {
     const el = document.getElementById('toast');
     el.textContent = msg;
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2600);
   };
- 
+
+  // === Профиль в углу + авторизация через spwmini ===
+  function setProfileChip({ name, online }) {
+    document.getElementById('chipName').textContent = name;
+    document.getElementById('chipAvatar').textContent = name[0]?.toUpperCase() || '?';
+    document.getElementById('chipStatus').textContent = online ? 'в сети (SPWorlds)' : 'войти через SPWorlds';
+    document.getElementById('chipDot').classList.toggle('on', online);
+  }
+
+  document.getElementById('profileChip').onclick = () => {
+    if (currentUser?.verified) {
+      tabCabinet.click();
+    } else {
+      // Вход завязан на SPWorlds: профиль подтягивается автоматически,
+      // только если сайт открыт как встроенное приложение внутри spworlds.ru —
+      // отдельной кнопки "войти" тут быть не может, это ограничение платформы
+      toast('Чтобы войти под своим ником — открой сайт через приложение на spworlds.ru');
+    }
+  };
+
   spm.on('ready', () => {
     currentUser = { username: spm.user.username, verified: true };
-    document.getElementById('userDot').classList.remove('off');
-    document.getElementById('userLabel').textContent = spm.user.username;
+    setProfileChip({ name: spm.user.username, online: true });
     renderCabinetHeader();
+    // Важно: перерисовываем доску, т.к. до этого момента currentUser был null
+    // и кнопка "Удалить" у своих заказов не показывалась
+    renderBoard(allOrders);
+    if (cabinetEl.classList.contains('show')) renderCabinet();
   });
   spm.on('initError', () => {
     currentUser = { username: 'Гость', verified: false };
-    document.getElementById('userLabel').textContent = 'Гость (не через spworlds.ru)';
+    setProfileChip({ name: 'Гость', online: false });
     renderCabinetHeader();
+    renderBoard(allOrders);
   });
- 
+
   // === Вкладки ===
   const tabBoard = document.getElementById('tabBoard');
   const tabCabinet = document.getElementById('tabCabinet');
+  const tabAbout = document.getElementById('tabAbout');
   const boardEl = document.getElementById('board');
   const newOrderForm = document.getElementById('newOrderForm');
   const cabinetEl = document.getElementById('cabinet');
- 
-  tabBoard.onclick = () => {
-    tabBoard.classList.add('active'); tabCabinet.classList.remove('active');
-    boardEl.style.display = 'grid'; document.getElementById('newOrderBtn').style.display = '';
+  const aboutEl = document.getElementById('about');
+  const newOrderBtn = document.getElementById('newOrderBtn');
+
+  function showTab(which) {
+    [tabBoard, tabCabinet, tabAbout].forEach(t => t.classList.remove('active'));
+    boardEl.style.display = 'none';
     cabinetEl.classList.remove('show');
-  };
-  tabCabinet.onclick = () => {
-    tabCabinet.classList.add('active'); tabBoard.classList.remove('active');
-    boardEl.style.display = 'none'; newOrderForm.classList.remove('show');
-    document.getElementById('newOrderBtn').style.display = 'none';
-    cabinetEl.classList.add('show');
-    renderCabinet();
-  };
- 
+    aboutEl.classList.remove('show');
+    newOrderForm.classList.remove('show');
+    newOrderBtn.style.display = 'none';
+
+    if (which === 'board') {
+      tabBoard.classList.add('active');
+      boardEl.style.display = 'grid';
+      newOrderBtn.style.display = '';
+    } else if (which === 'cabinet') {
+      tabCabinet.classList.add('active');
+      cabinetEl.classList.add('show');
+      renderCabinet();
+    } else if (which === 'about') {
+      tabAbout.classList.add('active');
+      aboutEl.classList.add('show');
+    }
+  }
+
+  tabBoard.onclick = () => showTab('board');
+  tabCabinet.onclick = () => showTab('cabinet');
+  tabAbout.onclick = () => showTab('about');
+
   // === Загрузка и рендер доски ===
   async function loadOrders() {
     const res = await fetch('/api/orders');
@@ -208,14 +324,14 @@
     renderBoard(allOrders);
     if (cabinetEl.classList.contains('show')) renderCabinet();
   }
- 
+
   function renderBoard(orders) {
     if (!orders.length) {
       boardEl.innerHTML = '<div class="empty">Пока заказов нет — стань первым</div>';
       return;
     }
     boardEl.innerHTML = orders.map(orderCard).join('');
- 
+
     orders.forEach((o) => {
       bind(`assign-${o.id}`, () => assignOrder(o.id));
       bind(`pay-${o.id}`, () => payOrder(o.id));
@@ -225,7 +341,7 @@
     });
   }
   function bind(id, fn) { const el = document.getElementById(id); if (el) el.onclick = fn; }
- 
+
   function orderCard(o) {
     let actions = '';
     if (o.status === 'open') {
@@ -240,7 +356,7 @@
     } else if (o.status === 'review') {
       actions = `<button class="btn btn-primary btn-sm" id="complete-${o.id}">Принять и оплатить</button>`;
     }
- 
+
     return `
       <div class="ticket">
         <div class="ticket-top">
@@ -257,27 +373,27 @@
         <div class="actions">${actions}</div>
       </div>`;
   }
- 
+
   function escapeHtml(s) {
     return s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
- 
+
   // === Кабинет ===
   function renderCabinetHeader() {
     document.getElementById('cabName').textContent = currentUser?.username || 'Гость';
     document.getElementById('cabAvatar').textContent = (currentUser?.username || '?')[0].toUpperCase();
   }
- 
+
   function renderCabinet() {
     const me = currentUser?.username;
     const asCustomer = allOrders.filter(o => o.customer === me);
     const asBuilder = allOrders.filter(o => o.builder === me);
- 
+
     const spent = asCustomer.filter(o => o.status === 'done').reduce((s, o) => s + o.budget, 0);
     const earned = asBuilder.filter(o => o.status === 'done').reduce((s, o) => s + o.budget, 0);
     document.getElementById('cabSpent').textContent = spent;
     document.getElementById('cabEarned').textContent = earned;
- 
+
     document.getElementById('cabCustomerList').innerHTML = asCustomer.length
       ? asCustomer.map(cabRow).join('')
       : '<div class="empty">Пока пусто</div>';
@@ -285,7 +401,7 @@
       ? asBuilder.map(cabRow).join('')
       : '<div class="empty">Пока пусто</div>';
   }
- 
+
   function cabRow(o) {
     return `
       <div class="cab-row">
@@ -293,13 +409,13 @@
         <div class="cab-row-meta"><span class="stamp ${o.status}">${STATUS_LABELS[o.status]}</span> · ${o.budget} АР</div>
       </div>`;
   }
- 
+
   // === Действия ===
   async function assignOrder(id) {
     const builder = currentUser?.username || 'Гость';
     const builderCard = prompt('Введи номер своей карты SPWorlds для получения оплаты:');
     if (!builderCard) return;
- 
+
     const res = await fetch(`/api/orders/${id}/assign`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ builder, builderCard }),
@@ -307,7 +423,7 @@
     if (res.ok) { toast('Ты назначен мастером. Ждём оплату заказчика.'); loadOrders(); }
     else toast('Не получилось откликнуться');
   }
- 
+
   async function payOrder(id) {
     const res = await fetch(`/api/orders/${id}/pay`, { method: 'POST' });
     if (!res.ok) return toast('Не удалось создать платёж');
@@ -315,20 +431,20 @@
     window.open(url, '_blank', 'width=460,height=640');
     toast('Открыто окно оплаты — заверши платёж и вернись сюда');
   }
- 
+
   async function reviewOrder(id) {
     const res = await fetch(`/api/orders/${id}/review`, { method: 'POST' });
     if (res.ok) { toast('Заказ отправлен на приёмку'); loadOrders(); }
     else toast('Не получилось');
   }
- 
+
   async function completeOrder(id) {
     if (!confirm('Подтвердить приёмку и перевести АРы мастеру?')) return;
     const res = await fetch(`/api/orders/${id}/complete`, { method: 'POST' });
     if (res.ok) { toast('Готово! АРы переведены мастеру.'); loadOrders(); }
     else toast('Не удалось завершить сделку');
   }
- 
+
   async function deleteOrder(id) {
     if (!confirm('Удалить этот заказ?')) return;
     const res = await fetch(`/api/orders/${id}`, {
@@ -338,7 +454,7 @@
     if (res.ok) { toast('Заказ удалён'); loadOrders(); }
     else toast('Не удалось удалить заказ');
   }
- 
+
   // === Форма нового заказа ===
   document.getElementById('newOrderBtn').onclick = () => newOrderForm.classList.toggle('show');
   document.getElementById('cancelOrder').onclick = () => newOrderForm.classList.remove('show');
@@ -348,9 +464,9 @@
     const budget = document.getElementById('f-budget').value;
     const deadlineDays = document.getElementById('f-days').value;
     const discordTag = document.getElementById('f-discord').value.trim();
- 
+
     if (!title || !budget) return toast('Укажи название и бюджет');
- 
+
     const res = await fetch('/api/orders', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -365,15 +481,10 @@
       loadOrders();
     } else toast('Не удалось создать заказ');
   };
- 
+
   renderCabinetHeader();
   loadOrders();
 </script>
- 
+
 </body>
 </html>
- 
-
-
-
-
