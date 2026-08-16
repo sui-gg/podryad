@@ -177,7 +177,7 @@ app.post('/api/orders/:id/pay', async (req, res) => {
       ],
       // '#MINIAPP' — обязательное значение, если открываем окно оплаты
       // через spm.openPayment() внутри мини-приложения на spworlds.ru
-      redirectUrl: '#MINIAPP',
+    redirectUrl: `${PUBLIC_URL}?paid=${order.id}`,
       webhookUrl: `${PUBLIC_URL}/api/webhook`,
       data: String(order.id),
     });
