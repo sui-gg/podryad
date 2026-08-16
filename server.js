@@ -1,5 +1,5 @@
 // ==========================================================================
-// ПОДРЯД — сервер стройбиржи для SPWorlds
+// Archinvest — сервер стройбиржи для SPWorlds
 // ==========================================================================
 // Что тут происходит:
 //  1. Храним заказы (в файле orders.json — просто и надёжно для старта,
@@ -182,10 +182,10 @@ app.post('/api/orders/:id/pay', async (req, res) => {
       data: String(order.id),
     });
 
-    order.paymentCode = payment.code;
+   order.paymentCode = payment.code;
     saveOrders(orders);
 
-    res.json({ code: payment.code });
+    res.json({ code: payment.code, url: payment.url });
   } catch (err) {
     console.error('Ошибка создания платежа:', err);
     res.status(502).json({ error: 'Не удалось создать платёж' });
